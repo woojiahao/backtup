@@ -25,5 +25,5 @@ compileTestKotlin {
 }
 
 application {
-  mainClassName = "com.github.woojiahao.TestKt"
+  mainClassName = "com.github.woojiahao.BacktupKt"
 }
