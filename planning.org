@@ -5,6 +5,3 @@
    =./backtup list <backup name>= - displays the files to backup from folder
 ** save
 ** add
-   ./backtup list
-   ./backtup save
-   ./backtup add
