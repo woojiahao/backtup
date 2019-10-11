@@ -7,25 +7,43 @@ import com.github.ajalt.clikt.parameters.arguments.default
 import com.github.woojiahao.models.Status
 import com.github.woojiahao.utility.loadConfiguration
 
-val configuration = loadConfiguration()
+val configurationStatus = loadConfiguration()
+val configuration = configurationStatus.value
 
 class Backtup : CliktCommand() {
-  override fun run() {}
+  override fun run() { }
 }
 
-class List : CliktCommand() {
-  val category by argument("Backup category").default("*")
+class ListComponents : CliktCommand(name = "ls") {
+  private val component by argument("Backup component").default("*")
+
   override fun run() {
-    echo(category)
+    when {
+      component == "*" -> {
+        echo("List of components present in .backup.json.")
+        configuration.componentNames.forEachIndexed { index, s ->
+          echo("[$index] $s")
+        }
+      }
+      configuration.hasComponent(component) -> {
+        echo("Files to backup listed under $component")
+        configuration.files(component).forEachIndexed { index, s ->
+          echo("[$index] $s")
+        }
+      }
+      else -> {
+        echo("$component is not listed in .backup.json.\nAdd to the configuration file to use it.", err = true)
+      }
+    }
   }
 }
 
 fun main(args: Array<String>) =
-  when (configuration) {
+  when (configurationStatus) {
     is Status.Fail -> object : CliktCommand() {
       override fun run() {
-        echo(configuration.error, err = true)
+        echo(configurationStatus.error, err = true)
       }
     }
-    is Status.Success -> Backtup().subcommands(List())
+    is Status.Success -> Backtup().subcommands(ListComponents())
   }.main(args)
