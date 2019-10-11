@@ -14,6 +14,11 @@ repositories {
 dependencies {
   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
   implementation("com.github.ajalt:clikt:2.2.0")
+  implementation("com.google.code.gson:gson:2.8.6")
+  implementation("org.apache.commons:commons-lang3:3.9")
+
+  testCompile("junit:junit:4.12")
+  testCompile("org.jetbrains.kotlin:kotlin-test-junit:1.3.21")
 }
 
 compileKotlin {
@@ -24,5 +29,5 @@ compileTestKotlin {
 }
 
 application {
-  mainClassName = "com.github.woojiahao.TestKt"
+  mainClassName = "com.github.woojiahao.BacktupKt"
 }
