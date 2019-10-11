@@ -2,7 +2,8 @@ package com.github.woojiahao.models
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import sun.security.krb5.Config
+import org.apache.commons.lang3.builder.EqualsBuilder
+import org.apache.commons.lang3.builder.HashCodeBuilder
 
 class ConfigurationComponent(
   val name: String,
@@ -37,10 +38,21 @@ class ConfigurationComponent(
     }
   }
 
+  override fun hashCode() = HashCodeBuilder(17, 37)
+    .append(name)
+    .append(path)
+    .append(items)
+    .toHashCode()
+
   override fun equals(other: Any?): Boolean {
+    other ?: return false
     if (other !is ConfigurationComponent) return false
-    return name == other.name &&
-      path == other.path &&
-      items.toList() == other.items.toList()
+    if (other == this) return true
+
+    return EqualsBuilder()
+      .append(name, other.name)
+      .append(path, other.path)
+      .append(items, other.items)
+      .isEquals
   }
 }
