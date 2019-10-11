@@ -1,3 +1,8 @@
 package com.github.woojiahao.utility
 
-fun path(vararg parts: String) = parts.joinToString("/")
+val rootPath
+  get() = System.getProperty("user.home")
+
+fun String.replaceWithRootPath(target: String = "~") = replace(target, rootPath)
+
+fun path(vararg parts: String) = parts.joinToString("/") { it.replaceWithRootPath() }
