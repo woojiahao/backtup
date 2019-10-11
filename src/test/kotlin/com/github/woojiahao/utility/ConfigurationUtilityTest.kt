@@ -1,8 +1,14 @@
 package com.github.woojiahao.utility
 
+import com.github.woojiahao.extensions.read
+import com.github.woojiahao.models.ConfigurationComponent
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import java.io.File
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -37,5 +43,23 @@ class ConfigurationUtilityTest {
     assertTrue(fileCreatedSuccessfully)
     val createFileAgain = createBackupFile(temporaryFolderPath)
     assertFalse(createFileAgain)
+  }
+
+  @Test
+  fun `loadDefaultBackupComponent loads backup file with default backup component`() {
+    val fileCreatedSuccessfully = createBackupFile(temporaryFolderPath)
+    if (fileCreatedSuccessfully) {
+      loadDefaultBackupComponent(temporaryFolderPath)
+      val json = Gson().read<JsonObject>(File(path(temporaryFolderPath, BACKUP_FILE_NAME)).readText())
+      val defaultComponent = ConfigurationComponent.default
+      val configurationComponent = ConfigurationComponent.fromJson(json)[0]
+      assertEquals(defaultComponent, configurationComponent)
+    }
+  }
+
+  @Test
+  fun `validateBackupFileStructure returns false if file format matches requirements`() {
+//    val isFileStructureValid = validateBackupFileStructure(temporaryFolderPath)
+//    assertTrue(isFileStructureValid)
   }
 }
