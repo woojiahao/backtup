@@ -50,7 +50,6 @@ class ConfigurationComponent(
   override fun equals(other: Any?): Boolean {
     other ?: return false
     if (other !is ConfigurationComponent) return false
-    if (other == this) return true
 
     return EqualsBuilder()
       .append(name, other.name)
