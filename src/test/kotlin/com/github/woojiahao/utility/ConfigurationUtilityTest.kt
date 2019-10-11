@@ -1,12 +1,14 @@
-package com.github.woojiahao
+package com.github.woojiahao.utility
 
+import com.github.woojiahao.utility.BACKUP_FILE_NAME
+import com.github.woojiahao.utility.hasBackupFile
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class ConfigurationTest {
+class ConfigurationUtilityTest {
   @get:Rule
   val temporaryFolder = TemporaryFolder()
 

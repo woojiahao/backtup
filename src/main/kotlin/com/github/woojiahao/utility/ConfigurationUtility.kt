@@ -1,6 +1,5 @@
-package com.github.woojiahao
+package com.github.woojiahao.utility
 
-import com.github.woojiahao.utility.path
 import java.io.File
 
 const val BACKUP_FILE_NAME = ".backup.json"
