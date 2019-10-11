@@ -11,6 +11,9 @@ class ConfigurationComponent(
   vararg val items: String
 ) {
   companion object {
+    val default
+      get() = ConfigurationComponent("default", "~")
+
     fun fromJson(jsonObject: JsonObject): List<ConfigurationComponent> {
       val components = mutableListOf<ConfigurationComponent>()
       jsonObject.entrySet().forEach {
