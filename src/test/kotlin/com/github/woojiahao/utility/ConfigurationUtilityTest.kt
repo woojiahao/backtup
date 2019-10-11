@@ -2,6 +2,7 @@ package com.github.woojiahao.utility
 
 import com.github.woojiahao.extensions.read
 import com.github.woojiahao.models.ConfigurationComponent
+import com.github.woojiahao.models.status.Status
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import org.junit.Rule
@@ -52,14 +53,10 @@ class ConfigurationUtilityTest {
       loadDefaultBackupComponent(temporaryFolderPath)
       val json = Gson().read<JsonObject>(File(path(temporaryFolderPath, BACKUP_FILE_NAME)).readText())
       val defaultComponent = ConfigurationComponent.DEFAULT
-      val configurationComponent = ConfigurationComponent.fromJson(json)[0]
-      assertEquals(defaultComponent, configurationComponent)
+      val configurationComponent = ConfigurationComponent.fromJson(json)
+      if (configurationComponent is Status.Success) {
+        assertEquals(defaultComponent, configurationComponent.value[0])
+      }
     }
-  }
-
-  @Test
-  fun `validateBackupFileStructure returns false if file structure is invalid`() {
-//    val isFileStructureValid = validateBackupFileStructure(temporaryFolderPath)
-//    assertTrue(isFileStructureValid)
   }
 }

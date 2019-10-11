@@ -1,5 +1,6 @@
 package com.github.woojiahao.models
 
+import com.github.woojiahao.models.status.Status
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import org.apache.commons.lang3.builder.EqualsBuilder
@@ -14,16 +15,54 @@ class ConfigurationComponent(
     val DEFAULT
       get() = ConfigurationComponent("default", "~")
 
-    fun fromJson(jsonObject: JsonObject): List<ConfigurationComponent> {
+    fun fromJson(jsonObject: JsonObject): Status<List<ConfigurationComponent>> {
       val components = mutableListOf<ConfigurationComponent>()
       jsonObject.entrySet().forEach {
+        if (!it.value.isJsonObject) {
+          return Status.Fail(
+            emptyList(),
+            "Invalid .backup.json format.",
+            "Values must be JSON objects.",
+            "Refer to Backtup documentation for more information about .backup.json."
+          )
+        }
+
+        val information = it.value.asJsonObject
+
+        if (!information.has("path")) {
+          return Status.Fail(
+            emptyList(),
+            "Invalid .backup.json format.",
+            "Must contain a path property.",
+            "Refer to Backtup documentation for more information about .backup.json."
+          )
+        }
+
+        if (!information["path"].asJsonPrimitive.isString) {
+          return Status.Fail(
+            emptyList(),
+            "Invalid .backup.json format.",
+            "Property \"path\" must have a value of string.",
+            "Refer to Backtup documentation for more information about .backup.json"
+          )
+        }
+
+        if (information.has("items") && !information["items"].isJsonArray) {
+          return Status.Fail(
+            emptyList(),
+            "Invalid .backup.json format.",
+            "Property \"items\" must have a value of a JSON array.",
+            "Refer to Backtup documentation for more information about .backup.json"
+          )
+        }
+
         val name = it.key
-        val path = it.value.asJsonObject["path"].asString
-        val items = it.value.asJsonObject["items"].asJsonArray.map { item -> item.asString }
+        val path = information["path"].asString
+        val items = information["items"].asJsonArray.map { item -> item.asString }
         val component = ConfigurationComponent(name, path, *items.toTypedArray())
         components += component
       }
-      return components
+      return Status.Success(components)
     }
   }
 
