@@ -11,7 +11,7 @@ class ConfigurationComponent(
   vararg val items: String
 ) {
   companion object {
-    val default
+    val DEFAULT
       get() = ConfigurationComponent("default", "~")
 
     fun fromJson(jsonObject: JsonObject): List<ConfigurationComponent> {

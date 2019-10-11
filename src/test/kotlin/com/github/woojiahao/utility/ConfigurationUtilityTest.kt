@@ -51,14 +51,14 @@ class ConfigurationUtilityTest {
     if (fileCreatedSuccessfully) {
       loadDefaultBackupComponent(temporaryFolderPath)
       val json = Gson().read<JsonObject>(File(path(temporaryFolderPath, BACKUP_FILE_NAME)).readText())
-      val defaultComponent = ConfigurationComponent.default
+      val defaultComponent = ConfigurationComponent.DEFAULT
       val configurationComponent = ConfigurationComponent.fromJson(json)[0]
       assertEquals(defaultComponent, configurationComponent)
     }
   }
 
   @Test
-  fun `validateBackupFileStructure returns false if file format matches requirements`() {
+  fun `validateBackupFileStructure returns false if file structure is invalid`() {
 //    val isFileStructureValid = validateBackupFileStructure(temporaryFolderPath)
 //    assertTrue(isFileStructureValid)
   }

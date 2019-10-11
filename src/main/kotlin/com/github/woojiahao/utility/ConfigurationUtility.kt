@@ -11,5 +11,5 @@ fun createBackupFile(root: String = "~") = File(path(root, BACKUP_FILE_NAME)).cr
 
 fun loadDefaultBackupComponent(root: String = "~") =
   with(File(path(root, BACKUP_FILE_NAME))) {
-    writeText(ConfigurationComponent.default.toJson().toString())
+    writeText(ConfigurationComponent.DEFAULT.toJson().toString())
   }
