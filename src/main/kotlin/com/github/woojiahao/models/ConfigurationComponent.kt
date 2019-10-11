@@ -37,13 +37,16 @@ class ConfigurationComponent(
           )
         }
 
-        if (!information["path"].asJsonPrimitive.isString) {
-          return Status.Fail(
-            emptyList(),
-            "Invalid .backup.json format.",
-            "Property \"path\" must have a value of string.",
-            "Refer to Backtup documentation for more information about .backup.json"
-          )
+        val pathCheckFailStatus = Status.Fail(
+          emptyList<ConfigurationComponent>(),
+          "Invalid .backup.json format.",
+          "Property \"path\" must have a value of string.",
+          "Refer to Backtup documentation for more information about .backup.json"
+        )
+        if (!information["path"].isJsonPrimitive) {
+          return pathCheckFailStatus
+        } else if (!information["path"].asJsonPrimitive.isString) {
+          return pathCheckFailStatus
         }
 
         if (information.has("items") && !information["items"].isJsonArray) {
@@ -57,7 +60,10 @@ class ConfigurationComponent(
 
         val name = it.key
         val path = information["path"].asString
-        val items = information["items"].asJsonArray.map { item -> item.asString }
+        val items =
+          if (!information.has("items")) emptyList<String>()
+          else information["items"].asJsonArray.map { item -> item.asString }
+
         val component = ConfigurationComponent(name, path, *items.toTypedArray())
         components += component
       }
