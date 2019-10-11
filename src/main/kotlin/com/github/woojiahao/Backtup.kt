@@ -10,16 +10,7 @@ import com.github.woojiahao.utility.loadConfiguration
 val configuration = loadConfiguration()
 
 class Backtup : CliktCommand() {
-  override fun run() {
-    echo("hello world")
-  }
-}
-
-class ErrorCommand : CliktCommand() {
-  override fun run() {
-    configuration as Status.Fail
-    echo(configuration.error, err = true)
-  }
+  override fun run() {}
 }
 
 class List : CliktCommand() {
@@ -29,10 +20,12 @@ class List : CliktCommand() {
   }
 }
 
-fun main(args: Array<String>) {
-  val command = when(configuration) {
-    is Status.Fail -> ErrorCommand()
+fun main(args: Array<String>) =
+  when (configuration) {
+    is Status.Fail -> object : CliktCommand() {
+      override fun run() {
+        echo(configuration.error, err = true)
+      }
+    }
     is Status.Success -> Backtup().subcommands(List())
-  }
-  command.main(args)
-}
+  }.main(args)
