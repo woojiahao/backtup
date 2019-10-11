@@ -14,21 +14,24 @@ class Backtup : CliktCommand() {
   override fun run() { }
 }
 
-class ListComponents : CliktCommand(name = "ls") {
-  private val component by argument("Backup component").default("*")
+class ListComponents : CliktCommand(help = "List all components within a backup configuration file", name = "ls") {
+  private val component by argument(
+    "COMPONENT",
+    "Component of the backup configuration file. If specified, will display the individual files to backup in a component."
+  ).default("*")
 
   override fun run() {
     when {
       component == "*" -> {
         echo("List of components present in .backup.json.")
         configuration.componentNames.forEachIndexed { index, s ->
-          echo("[$index] $s")
+          echo("[${index + 1}] $s")
         }
       }
       configuration.hasComponent(component) -> {
         echo("Files to backup listed under $component")
         configuration.files(component).forEachIndexed { index, s ->
-          echo("[$index] $s")
+          echo("[${index + 1}] $s")
         }
       }
       else -> {
