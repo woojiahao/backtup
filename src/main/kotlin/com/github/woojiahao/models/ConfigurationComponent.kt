@@ -1,6 +1,5 @@
 package com.github.woojiahao.models
 
-import com.github.woojiahao.models.status.Status
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import org.apache.commons.lang3.builder.EqualsBuilder

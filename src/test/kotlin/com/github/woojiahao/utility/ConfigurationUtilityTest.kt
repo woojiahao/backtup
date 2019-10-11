@@ -2,7 +2,7 @@ package com.github.woojiahao.utility
 
 import com.github.woojiahao.extensions.read
 import com.github.woojiahao.models.ConfigurationComponent
-import com.github.woojiahao.models.status.Status
+import com.github.woojiahao.models.Status
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import org.junit.Rule
