@@ -18,3 +18,8 @@ $ echo 'alias backup="~/backtup/build/install/backtup/bin/backtup"' >> .zshrc
 - [ ] Read up on Gradle's application plugin
 - [ ] Read up on Gradle's distribution plugin
   - [ ] installDist
+- [ ] Edit component
+  - [ ] path
+  - [ ] name
+  - [ ] items
+- [ ] Delete component
