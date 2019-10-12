@@ -30,10 +30,13 @@ class Configuration(private val components: List<ConfigurationComponent>) {
   fun addItem(component: ConfigurationComponent, item: String): Configuration {
     val componentPosition = components.indexOf(component)
     val updatedComponent = component.addItem(item)
-    val mutableComponents = components.toMutableList().apply {
-      removeAt(componentPosition)
-      add(componentPosition, updatedComponent)
-    }.toList()
+    val mutableComponents = components
+      .toMutableList()
+      .apply {
+        removeAt(componentPosition)
+        add(componentPosition, updatedComponent)
+      }
+      .toList()
     return Configuration(mutableComponents)
   }
 
