@@ -14,10 +14,13 @@ fun hasBackupFile(root: String = "~") = File(path(root, BACKUP_FILE_NAME)).exist
 
 fun createBackupFile(root: String = "~") = File(path(root, BACKUP_FILE_NAME)).createNewFile()
 
-fun loadDefaultBackupComponent(root: String = "~") =
+fun writeConfiguration(configuration: Configuration, root: String = "~") =
   with(File(path(root, BACKUP_FILE_NAME))) {
-    writeText(ConfigurationComponent.DEFAULT.toJson().toString())
+    writeText(configuration.toJson().toString())
   }
+
+fun loadDefaultBackupComponent(root: String = "~") =
+  writeConfiguration(Configuration(ConfigurationComponent.DEFAULT), root)
 
 fun loadConfiguration(root: String = "~"): Status<Configuration> {
   if (!hasBackupFile(root)) {
