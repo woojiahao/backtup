@@ -71,6 +71,17 @@ class ConfigurationComponent(
     }
   }
 
+  fun addItem(item: String) = ConfigurationComponent(
+    name,
+    path,
+    *items
+      .toMutableList()
+      .apply { this += item }
+      .toTypedArray()
+  )
+
+  fun hasItem(item: String) = item in items
+
   fun toJson(): JsonObject {
     val componentInfo = JsonObject().apply {
       addProperty("path", path)

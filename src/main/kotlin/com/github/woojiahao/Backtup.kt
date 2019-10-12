@@ -8,16 +8,14 @@ import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.default
 import com.github.woojiahao.models.Status
 import com.github.woojiahao.utility.loadConfiguration
+import com.github.woojiahao.utility.path
 import com.github.woojiahao.utility.replaceWithRootPath
 import com.github.woojiahao.utility.writeConfiguration
 import java.io.File
 
 val configurationStatus = loadConfiguration()
 val configuration = configurationStatus.value
-val acceptedComponentNames = mutableListOf<String>().apply {
-  this += configuration.componentNames
-  this += "*"
-}
+val acceptedComponentNames = listOf("*", *configuration.componentNames.toTypedArray())
 
 class Backtup : CliktCommand() {
   override fun run() {}
@@ -35,23 +33,26 @@ class ListComponents : CliktCommand(help = "List all components within a backup 
     }
 
     when {
-      component == "*" -> {
-        echo("List of components present in .backup.json.")
-        configuration.componentNames.forEachIndexed { index, s ->
-          echo("[${index + 1}] $s")
-        }
-      }
-      // TODO: When configuration is empty, write different prompt
-      configuration.hasComponent(component) -> {
-        val files = configuration.files(component)
-        if (files.isEmpty()) {
-          echo("No items in \"$component\". Add new items with \"backtup add $component [ITEM]\".")
-        } else {
-          echo("Files to backup listed under $component")
-          configuration.files(component).forEachIndexed { index, s ->
-            echo("[${index + 1}] $s")
-          }
-        }
+      component == "*" -> listAllComponents()
+      configuration.hasComponent(component) -> listComponentItems(component)
+    }
+  }
+
+  private fun listAllComponents() {
+    echo("List of components present in .backup.json.")
+    configuration.componentNames.forEachIndexed { index, s ->
+      echo("[${index + 1}] $s")
+    }
+  }
+
+  private fun listComponentItems(component: String) {
+    val files = configuration.files(component)
+    if (files.isEmpty()) {
+      echo("No items in \"$component\". Add new items with \"backtup add $component [ITEM]\".")
+    } else {
+      echo("Files to backup listed under $component")
+      configuration.files(component).forEachIndexed { index, s ->
+        echo("[${index + 1}] $s")
       }
     }
   }
@@ -63,6 +64,11 @@ class AddComponent : CliktCommand(help = "Add a new component to the backup conf
     help = "Component to add new items to. If not specified, add new component to configuration."
   ).default("*")
 
+  private val item by argument(
+    name = "ITEM",
+    help = "Item to be added to given component. Component specified must be an existing component."
+  ).default("")
+
   override fun run() {
     if (component !in acceptedComponentNames) {
       throw UsageError("Invalid component name. Accepted component names: ${acceptedComponentNames.joinToString(", ")}")
@@ -70,7 +76,9 @@ class AddComponent : CliktCommand(help = "Add a new component to the backup conf
 
     when {
       component == "*" -> addComponent()
-      component in acceptedComponentNames -> {
+      configuration.hasComponent(component) -> {
+        if (item.trim().isEmpty()) throw UsageError("Item must be specified.")
+        else addItem(component, item)
       }
     }
   }
@@ -93,6 +101,20 @@ class AddComponent : CliktCommand(help = "Add a new component to the backup conf
     val updatedConfiguration = configuration.addComponent(name, path)
     writeConfiguration(updatedConfiguration)
     echo("Component created. To add items to the component, edit .backup.json or use \"backtup add $name [ITEM]\"")
+  }
+
+  private fun addItem(component: String, item: String) {
+    val configurationComponent = configuration.matchComponent(component)
+    val itemPath = path(configurationComponent.path, item)
+    if (!File(itemPath).exists()) throw UsageError("$itemPath does not exist.")
+    if (configurationComponent.hasItem(item)) throw UsageError("$item already exists under \"$component\"")
+
+    echo("Adding new item to \"$component\".")
+    echo("Path for \"$component\" is ${configurationComponent.path.replaceWithRootPath()}")
+
+    val updatedConfiguration = configuration.addItem(configurationComponent, item)
+    writeConfiguration(updatedConfiguration)
+    echo("Item added to \"$component\" pointing to $itemPath")
   }
 }
 

@@ -10,7 +10,7 @@ class Configuration(private val components: List<ConfigurationComponent>) {
 
   val componentNames = components.map { it.name }
 
-  fun hasComponent(component: String) = componentNames.contains(component)
+  fun hasComponent(component: String) = component in componentNames
 
   fun matchComponent(component: String) = components.first { it.name == component }
 
@@ -24,6 +24,16 @@ class Configuration(private val components: List<ConfigurationComponent>) {
       .toMutableList()
       .apply { this += ConfigurationComponent(name, path) }
       .toList()
+    return Configuration(mutableComponents)
+  }
+
+  fun addItem(component: ConfigurationComponent, item: String): Configuration {
+    val componentPosition = components.indexOf(component)
+    val updatedComponent = component.addItem(item)
+    val mutableComponents = components.toMutableList().apply {
+      removeAt(componentPosition)
+      add(componentPosition, updatedComponent)
+    }.toList()
     return Configuration(mutableComponents)
   }
 
