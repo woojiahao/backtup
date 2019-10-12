@@ -43,9 +43,14 @@ class ListComponents : CliktCommand(help = "List all components within a backup 
       }
       // TODO: When configuration is empty, write different prompt
       configuration.hasComponent(component) -> {
-        echo("Files to backup listed under $component")
-        configuration.files(component).forEachIndexed { index, s ->
-          echo("[${index + 1}] $s")
+        val files = configuration.files(component)
+        if (files.isEmpty()) {
+          echo("No items in \"$component\". Add new items with \"backtup add $component [ITEM]\".")
+        } else {
+          echo("Files to backup listed under $component")
+          configuration.files(component).forEachIndexed { index, s ->
+            echo("[${index + 1}] $s")
+          }
         }
       }
     }
