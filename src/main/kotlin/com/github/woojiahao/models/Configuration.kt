@@ -1,5 +1,6 @@
 package com.github.woojiahao.models
 
+import com.github.woojiahao.extensions.modify
 import com.github.woojiahao.utility.replaceWithRootPath
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
@@ -7,6 +8,11 @@ import com.google.gson.JsonObject
 class Configuration(private val components: List<ConfigurationComponent>) {
 
   constructor(vararg components: ConfigurationComponent) : this(components.toList())
+
+  constructor(
+    originalComponents: List<ConfigurationComponent>,
+    modification: MutableList<ConfigurationComponent>.() -> Unit
+  ) : this(originalComponents.modify(modification))
 
   val componentNames = components.map { it.name }
 
@@ -19,26 +25,17 @@ class Configuration(private val components: List<ConfigurationComponent>) {
       items.map { "$path/$it".replaceWithRootPath() }
     }
 
-  fun addComponent(name: String, path: String): Configuration {
-    val mutableComponents = components
-      .toMutableList()
-      .apply { this += ConfigurationComponent(name, path) }
-      .toList()
-    return Configuration(mutableComponents)
-  }
+  fun addComponent(name: String, path: String) =
+    Configuration(components) {
+      add(ConfigurationComponent(name, path))
+    }
 
-  fun addItem(component: ConfigurationComponent, item: String): Configuration {
-    val componentPosition = components.indexOf(component)
-    val updatedComponent = component.addItem(item)
-    val mutableComponents = components
-      .toMutableList()
-      .apply {
-        removeAt(componentPosition)
-        add(componentPosition, updatedComponent)
-      }
-      .toList()
-    return Configuration(mutableComponents)
-  }
+  fun addItem(component: ConfigurationComponent, item: String) =
+    Configuration(components) {
+      val componentPosition = components.indexOf(component)
+      removeAt(componentPosition)
+      add(componentPosition, component.addItem(item))
+    }
 
   fun toJson(): JsonObject {
     val parent = JsonObject()
