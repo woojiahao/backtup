@@ -23,3 +23,5 @@ $ echo 'alias backup="~/backtup/build/install/backtup/bin/backtup"' >> .zshrc
   - [ ] name
   - [ ] items
 - [ ] Delete component
+- [ ] Show path in "backtup ls"
+- [ ] Investigate `default.validate` pattern
