@@ -13,11 +13,12 @@ import com.github.ajalt.clikt.parameters.options.validate
 import com.github.woojiahao.extensions.modify
 import com.github.woojiahao.models.ConfigurationComponent
 import com.github.woojiahao.models.Status
-import com.github.woojiahao.utility.loadConfiguration
-import com.github.woojiahao.utility.path
-import com.github.woojiahao.utility.replaceWithRootPath
-import com.github.woojiahao.utility.writeConfiguration
+import com.github.woojiahao.utility.*
 import java.io.File
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatter.ofPattern
 
 val configurationStatus = loadConfiguration()
 val configuration = configurationStatus.value
@@ -156,6 +157,36 @@ class EditComponent : CliktCommand(help = "Edit a component within the backup co
   }
 }
 
+class RunComponent : CliktCommand(help = "Run backtup to backup files to a target device", name = "run") {
+  private val component by argument(
+    help = "Name of component to use for backup.",
+    name = "COMPONENT"
+  ).validate {
+    require(it in configuration.componentNames) {
+      "Component must be an existing component. View all components with \"backtup ls\""
+    }
+  }
+
+  private val destination by argument(
+    help = "Destination for backup to be sent to.",
+    name = "DESTINATION"
+  ).validate {
+    require(File(it.replaceWithRootPath()).exists()) {
+      "Destination does not exist on local file system."
+    }
+  }
+
+  override fun run() {
+    val timestamp = ofPattern("dd-MM-yyyy_HH:mm").format(LocalDateTime.now())
+    val backupFolder = path(destination, timestamp)
+    cmd("mkdir $backupFolder")
+    configuration.files(component).forEach {
+      if (!File(it).exists()) throw UsageError("$it listed in \"$component\" does not exist.")
+      cmd("rsync -avPR --exclude=\".git\" --exclude=\"venv\" --exclude=\"node_modules\" $it $backupFolder")
+    }
+  }
+}
+
 fun main(args: Array<String>) =
   when (configurationStatus) {
     is Status.Fail -> object : CliktCommand() {
@@ -167,6 +198,7 @@ fun main(args: Array<String>) =
       .subcommands(
         ListComponents(),
         AddComponent(),
-        EditComponent()
+        EditComponent(),
+        RunComponent()
       )
   }.main(args)
