@@ -37,12 +37,18 @@ class Configuration(private val components: List<ConfigurationComponent>) {
       add(componentPosition, component.addItem(item))
     }
 
+  fun update(originalComponent: ConfigurationComponent, updatedComponent: ConfigurationComponent) =
+    Configuration(components) {
+      val componentPosition = components.indexOf(originalComponent)
+      removeAt(componentPosition)
+      add(componentPosition, updatedComponent)
+    }
+
+
   fun toJson(): JsonObject {
     val parent = JsonObject()
     components.forEach {
-      val itemsArray = JsonArray().apply {
-        it.items.forEach { item -> add(item) }
-      }
+      val itemsArray = JsonArray().apply { it.items.forEach { item -> add(item) } }
       val componentJson = JsonObject().apply {
         addProperty("path", it.path)
         add("items", itemsArray)

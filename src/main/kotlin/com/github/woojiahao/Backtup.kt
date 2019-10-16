@@ -11,6 +11,7 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.validate
 import com.github.woojiahao.extensions.modify
+import com.github.woojiahao.models.ConfigurationComponent
 import com.github.woojiahao.models.Status
 import com.github.woojiahao.utility.loadConfiguration
 import com.github.woojiahao.utility.path
@@ -140,13 +141,18 @@ class EditComponent : CliktCommand(help = "Edit a component within the backup co
   private val name by option("-n", "--name", help = "New name value")
 
   override fun run() {
-    val newPath = path ?: matchingComponent.path.replaceWithRootPath()
+    val newPath = (path ?: matchingComponent.path).replaceWithRootPath()
     val newName = name ?: matchingComponent.name
 
     if (!File(newPath).exists()) throw UsageError("Path provided does not exist on local machine.")
     if (newName in configuration.componentNames.modify { remove(matchingComponent.name) }) {
       throw UsageError("Name provided is already in use.")
     }
+
+    val updatedComponent = ConfigurationComponent(newName, newPath, *matchingComponent.items)
+    val updatedConfiguration = configuration.update(matchingComponent, updatedComponent)
+    writeConfiguration(updatedConfiguration)
+    echo("Component \"$component\" has been updated.")
   }
 }
 
