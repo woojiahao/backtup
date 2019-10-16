@@ -6,6 +6,12 @@ import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.output.TermUi
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.default
+import com.github.ajalt.clikt.parameters.arguments.validate
+import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.validate
+import com.github.woojiahao.extensions.modify
+import com.github.woojiahao.models.ConfigurationComponent
 import com.github.woojiahao.models.Status
 import com.github.woojiahao.utility.loadConfiguration
 import com.github.woojiahao.utility.path
@@ -118,6 +124,38 @@ class AddComponent : CliktCommand(help = "Add a new component to the backup conf
   }
 }
 
+class EditComponent : CliktCommand(help = "Edit a component within the backup configuration file", name = "edit") {
+  private val component by argument(
+    help = "Name of component to edit.",
+    name = "COMPONENT"
+  ).validate {
+    require(it in configuration.componentNames) {
+      "Component must be an existing component. View all components with \"backtup ls\""
+    }
+  }
+
+  private val matchingComponent by lazy { configuration.matchComponent(component) }
+
+  private val path by option("-p", "--path", help = "New path value")
+
+  private val name by option("-n", "--name", help = "New name value")
+
+  override fun run() {
+    val newPath = (path ?: matchingComponent.path).replaceWithRootPath()
+    val newName = name ?: matchingComponent.name
+
+    if (!File(newPath).exists()) throw UsageError("Path provided does not exist on local machine.")
+    if (newName in configuration.componentNames.modify { remove(matchingComponent.name) }) {
+      throw UsageError("Name provided is already in use.")
+    }
+
+    val updatedComponent = ConfigurationComponent(newName, newPath, *matchingComponent.items)
+    val updatedConfiguration = configuration.update(matchingComponent, updatedComponent)
+    writeConfiguration(updatedConfiguration)
+    echo("Component \"$component\" has been updated.")
+  }
+}
+
 fun main(args: Array<String>) =
   when (configurationStatus) {
     is Status.Fail -> object : CliktCommand() {
@@ -128,6 +166,7 @@ fun main(args: Array<String>) =
     is Status.Success -> Backtup()
       .subcommands(
         ListComponents(),
-        AddComponent()
+        AddComponent(),
+        EditComponent()
       )
   }.main(args)
